@@ -7,7 +7,9 @@ LOG_FILE = "server_log.txt"
 clients = {}  # Dictionary to store client connections
 
 def log_message(message):
-    pass
+    with open(LOG_FILE, "a") as log:
+        log.write(message + "\n")
+    print(message)
 
 def handle_client(client_socket, client_address):
     pass
