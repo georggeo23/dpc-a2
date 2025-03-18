@@ -1,4 +1,5 @@
 import socket
+import threading
 
 # Server configuration
 HOST = socket.gethostname()
@@ -37,7 +38,25 @@ def process_request(client_socket, client_address, data):
     return "ERROR: Invalid command."
 
 def start_server():
-    pass
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
+    server.listen(5)
+
+    startup_message = f"Server listening on port {PORT}"
+    log_message(startup_message)
+    print(startup_message)
+
+    while True:
+        client_socket, client_address = server.accept()
+        username = client_socket.recv(1024).decode()
+        clients[username] = client_socket
+        
+        connection_msg = f"{username} connected from {client_address}"
+        log_message(connection_msg)
+        print(connection_msg)
+
+        thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        thread.start()
 
 if __name__ == "__main__":
     start_server()
