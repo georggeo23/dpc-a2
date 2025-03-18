@@ -19,13 +19,9 @@ def start_client(username):
         # Handle server response here
         client.send(command.encode())
         response = client.recv(1024).decode()
-        
+
         if response.startswith("CONTENT"):
-            parts = response.split(" ", 2)
-            filename, content = parts[1], parts[2]
-            with open(f"client_{username}_{filename}", "w") as f:
-                f.write(content)
-            print(f"File {filename} received and saved.")
+            pass
         elif response.startswith("MSG"):
             parts = response.split(" ", 2)
             sender, message = parts[1], parts[2]
