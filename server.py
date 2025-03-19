@@ -29,7 +29,18 @@ def process_request(client_socket, client_address, data):
 
     #3
     elif command in ["ADD", "MULTIPLY", "DIVIDE", "SUBTRACT"] and len(parts) == 3:
-        pass
+        try:
+            num1, num2 = float(parts[1]), float(parts[2])
+            if command == "ADD":
+                return f"RESULT {num1 + num2}"
+            elif command == "MULTIPLY":
+                return f"RESULT {num1 * num2}"
+            elif command == "DIVIDE":
+                return f"RESULT {num1 / num2}" if num2 != 0 else "ERROR: Division by zero"
+            elif command == "SUBTRACT":
+                return f"RESULT {num1 - num2}"
+        except ValueError:
+            return "ERROR: Invalid numbers."
 
     #4
     elif command == "MESSAGE" and len(parts) > 2:
