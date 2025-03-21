@@ -44,7 +44,12 @@ def process_request(client_socket, client_address, data):
 
     #4
     elif command == "MESSAGE" and len(parts) > 2:
-        pass
+        recipient, message = parts[1], " ".join(parts[2:])
+        if recipient in clients:
+            clients[recipient].send(f"MSG {client_address} {message}".encode())
+            return "Message sent."
+        else:
+            return "ERROR: Recipient not connected."
 
     return "ERROR: Invalid command."
 
