@@ -14,7 +14,7 @@ def log_message(message):
     print(message)
 
 def handle_client(client_socket, client_address):
-    print(f"New connection from {client_address}")
+    log_message(f"New connection from {client_address}")
     while True:
         try:
             request = client_socket.recv(1024).decode()
@@ -22,27 +22,32 @@ def handle_client(client_socket, client_address):
                 break
 
             log_message(f"Received from {client_address}: {request}")
-            response = process_request(request, client_socket)
+            response = process_request(client_address, client_socket, request)
             client_socket.send(response.encode())
         
         except Exception as e:
-            print(f"Error handling client {client_address}: {e}")
+            log_message(f"Error handling client {client_address}: {e}")
             break
     
     client_socket.close()
-    print(f"Connection closed for {client_address}")
+    log_message(f"Connection closed for {client_address}")
 
-def process_request(client_socket, data):
-    parts = data.split()
+def process_request(client_address, client_socket, data):
+    parts = data.split(maxsplit=2)
+    print(parts)
     command = parts[0].upper()
+
+    # storage_dir = "server_files"
+    # os.makedirs(storage_dir, exist_ok=True)
 
     #1
     if command == "STORE" and len(parts) > 2:
         filename, data = parts[1], parts[2]
+        #file_path = os.path.join(storage_dir, filename)
+
         with open(filename, "w") as f:
             f.write(data)
         return "File stored successfully."
-        pass
 
     #2
     elif command == "RETRIEVE" and len(parts) == 2:
@@ -50,8 +55,8 @@ def process_request(client_socket, data):
         if os.path.exists(filename):
             with open(filename, "r") as f:
                 data = f.read()
-            client_socket.sendall(data.encode())  # Send file data
-            return f"File '{filename}' sent successfully."
+            log_message("File retrieved")
+            return data
         else:
             return "File not found."
 
@@ -88,7 +93,6 @@ def start_server():
 
     startup_message = f"Server listening on port {PORT}"
     log_message(startup_message)
-    print(startup_message)
 
     while True:
         client_socket, client_address = server.accept()
@@ -97,7 +101,6 @@ def start_server():
         
         connection_msg = f"{username} connected from {client_address}"
         log_message(connection_msg)
-        print(connection_msg)
 
         thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
         thread.start()
