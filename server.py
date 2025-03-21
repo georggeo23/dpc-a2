@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 
@@ -13,19 +14,46 @@ def log_message(message):
     print(message)
 
 def handle_client(client_socket, client_address):
-    pass
+    print(f"New connection from {client_address}")
+    while True:
+        try:
+            request = client_socket.recv(1024).decode()
+            if not request:
+                break
 
-def process_request(client_socket, client_address, data):
+            log_message(f"Received from {client_address}: {request}")
+            response = process_request(request, client_socket)
+            client_socket.send(response.encode())
+        
+        except Exception as e:
+            print(f"Error handling client {client_address}: {e}")
+            break
+    
+    client_socket.close()
+    print(f"Connection closed for {client_address}")
+
+def process_request(client_socket, data):
     parts = data.split()
     command = parts[0].upper()
 
     #1
     if command == "STORE" and len(parts) > 2:
+        filename, data = parts[1], parts[2]
+        with open(filename, "w") as f:
+            f.write(data)
+        return "File stored successfully."
         pass
 
     #2
     elif command == "RETRIEVE" and len(parts) == 2:
-        pass
+        filename = parts[1]
+        if os.path.exists(filename):
+            with open(filename, "r") as f:
+                data = f.read()
+            client_socket.sendall(data.encode())  # Send file data
+            return f"File '{filename}' sent successfully."
+        else:
+            return "File not found."
 
     #3
     elif command in ["ADD", "MULTIPLY", "DIVIDE", "SUBTRACT"] and len(parts) == 3:
